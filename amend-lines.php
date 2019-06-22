@@ -5,19 +5,12 @@ $ticketId = $_POST["ticket_id"];
 
 $numbersPerLine = 3;
 
-function new_ticket($nLines, $numbersPerLine){
-    if(file_exists("tickets.json")){
-        $ticketsJSON = file_get_contents('tickets.json');
-    }else{
-        $ticketsJSON = fopen('tickets.json', 'w');
-    }
+
+function amend_lines($nLines, $numbersPerLine, $ticketId){
+    $ticketsJSON = file_get_contents('tickets.json');
     $tickets = json_decode($ticketsJSON, true);
 
-    $newTicket = array(
-        "id"        => sizeof($tickets),
-        "n_lines"   => $nLines,
-        "lines"     => array(),
-    );
+    $tickets[$ticketId]["n_lines"] += $nLines;
 
     for($i = 0; $i < $nLines; $i++){
         $line = "";
@@ -25,17 +18,15 @@ function new_ticket($nLines, $numbersPerLine){
             $rand_n = mt_rand(0, 2);
             $line .= $rand_n;
         }    
-        $newLine = $line;
-        array_push($newTicket["lines"], $newLine);
+        array_push($tickets[$ticketId]["lines"], $line);
         // print_r($newTicket);
     }
 
-    $tickets[] = $newTicket;
     file_put_contents('tickets.json', json_encode($tickets, JSON_PRETTY_PRINT));
 
 }
 
-new_ticket($nLines, $numbersPerLine);
+amend_lines($nLines, $numbersPerLine, $ticketId);
 
 header("refresh: .1; url= index.php"); 
 
