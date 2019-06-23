@@ -1,37 +1,51 @@
 <?php
+/* 
+
+check_status method: to calculated the requested ID ticket score reordering the lines according to the result
+-- arg $ticketId: ticket identifier to check status and update
+
+*/
 
 $ticketId = $_POST["ticket_id"];
 
-function score($ticketId){
+function check_status($ticketId){
     $ticketsJSON = file_get_contents('tickets.json');
     $tickets = json_decode($ticketsJSON, true);
-    
-    foreach($tickets[$ticketId]["lines"] as $line){
-        $lineArray = str_split($line);
-        $lineTotal = array_sum($lineArray); 
-        $result = 0;
-        // print_r($auxArray);
-        // break;
-        if($lineTotal == 2){
-            $result = 10;
-        }else if(sizeof(array_values($lineArray)) > 1){
-            $result = 5;
-        }else if($lineArray[0] != $lineArray[1] && $lineArray[0] != $lineArray[2]){
-            $result = 1;
+    $totalScore = 0;
+
+    $scoreArray = array();
+    foreach($tickets as &$ticket){
+        if ($ticket['id'] == $ticketId){
+            foreach($ticket["lines"] as $line){
+                $lineArray = str_split($line);
+                $lineTotal = array_sum($lineArray); 
+                $score = "00";
+
+                if($lineTotal == 2){
+                    $score = "10";
+                }else if($lineArray[0] == $lineArray[1] && $lineArray[1] == $lineArray[2]){
+                    $score = "05";
+                }else if($lineArray[0] != $lineArray[1] && $lineArray[0] != $lineArray[2]){
+                    $score = "01";
+                }
+
+                $totalScore += (int)$score;
+                $line = $score . "-" . $line;
+                array_push($scoreArray, $line);
+                rsort($scoreArray);
+            }
+
+            $ticket["lines"] = $scoreArray;
+            $ticket["status"] = true;
+            $ticket["score"] = $totalScore;
+            break;
         }
-        $scoreArray[$line] = $result;
     }
-
-    arsort($scoreArray);
-
-    $tickets[$ticketId]["lines"] = $scoreArray;
-    $tickets[$ticketId]["status"] = true;
-    // print_r($scoreArray);
+    
     file_put_contents('tickets.json', json_encode($tickets, JSON_PRETTY_PRINT));
-
 }
 
-score($ticketId);
+check_status($ticketId);
 
 header("refresh: .1; url= index.php"); 
 

@@ -1,8 +1,16 @@
 <?php
+/* 
+
+new_ticket method: to create a new ID ticket with n new random lines 
+-- arg $nLines: number of lines to add 
+-- arg $numbersPerLine: n random integers from 0 to 2
+
+*/
+
+// function to generate n lines with m numbers per line
+include 'generate-lines.php'; 
 
 $nLines = $_POST["n_lines"];
-$ticketId = $_POST["ticket_id"];
-
 $numbersPerLine = 3;
 
 function new_ticket($nLines, $numbersPerLine){
@@ -13,22 +21,15 @@ function new_ticket($nLines, $numbersPerLine){
     }
     $tickets = json_decode($ticketsJSON, true);
 
+    $lastTicket = end($tickets);
+
     $newTicket = array(
-        "id"        => sizeof($tickets),
-        "n_lines"   => $nLines,
-        "lines"     => array(),
+        "id"        => $lastTicket["id"] + 1, //ticket ID starting from 1 and increasing according to the last existent ticket
+        "n_lines"   => $nLines, //n lines
+        "lines"     => array(), //string array of lines
     );
 
-    for($i = 0; $i < $nLines; $i++){
-        $line = "";
-        for($j = 0; $j < $numbersPerLine; $j++){
-            $rand_n = mt_rand(0, 2);
-            $line .= $rand_n;
-        }    
-        $newLine = $line;
-        array_push($newTicket["lines"], $newLine);
-        // print_r($newTicket);
-    }
+    $newTicket["lines"] = generate_lines($nLines, $numbersPerLine);
 
     $tickets[] = $newTicket;
     file_put_contents('tickets.json', json_encode($tickets, JSON_PRETTY_PRINT));
