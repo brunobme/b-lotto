@@ -19,6 +19,9 @@ new-ticket.php through the method
 ```php
 function new_ticket(arg $nLines, arg $numbersPerLine);
 
+$nLines: //number of lines to add 
+$numbersPerLine: //n random integers from 0 to 2
+
 ```
 
 ### Amend Lines
@@ -26,7 +29,7 @@ A ticket can be amended with n additional lines by calling amend-lines.php throu
 
 
 ```php
-function amend_lines(arg $nLines, arg $numbersPerLine, arg $ticketId){
+function amend_lines(arg $nLines, arg $numbersPerLine, arg $ticketId);
 
 ```
 
